@@ -1,10 +1,22 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <cctype>
 #include <map>
 
 using namespace std;
+
+vector<size_t> endOfLines = {};
+size_t giveLineNo(size_t token){
+    size_t lineNo = 0;
+    for(size_t i = 0; i < endOfLines.size(); i++){
+        if(token > endOfLines[i]){
+            lineNo++;
+        }
+    }
+    return lineNo;
+}
 
 enum TokenType {
     T_INT, T_ID, T_NUM, T_IF, T_ELSE, T_RETURN, 
@@ -43,6 +55,9 @@ public:
             char current = src[pos];
             
             if (isspace(current)) {
+                if (current == '\n') {
+                    endOfLines.push_back(tokens.size()-1);
+                }
                 pos++;
                 continue;
             }
@@ -128,6 +143,7 @@ private:
             parseBlock();
         } else {
             cout << "Syntax error: unexpected token " << tokens[pos].value << endl;
+            cout << "Error at line: " << giveLineNo(pos) << endl;
             exit(1);
         }
     }
@@ -199,6 +215,7 @@ private:
             expect(T_RPAREN);
         } else {
             cout << "Syntax error: unexpected token " << tokens[pos].value << endl;
+            cout << "Error at line: " << giveLineNo(pos) << endl;
             exit(1);
         }
     }
@@ -208,10 +225,34 @@ private:
             pos++;
         } else {
             cout << "Syntax error: expected " << type << " but found " << tokens[pos].value << endl;
+            cout << "Error at line: " << giveLineNo(pos) << endl;
             exit(1);
         }
     }
 };
+
+// int main(int argc, char* argv[]) {
+//     // Check if a file was passed as an argument
+//     if (argc != 2) {
+//         cerr << "Usage: " << argv[0] << " <filename.txt>" << endl;
+//         return 1;
+//     }
+//     // Open the file
+//     ifstream file(argv[1]);
+//     if (!file) {
+//         cerr << "Error opening file: " << argv[1] << endl;
+//         return 1;
+//     }
+//     // Read and output the file content
+//     string line;
+//     while (getline(file, line)) {
+//         cout << line << endl;
+//     }
+//     // Close the file
+//     file.close();
+//     return 0;
+// }
+
 
 int main() {
     string input = R"(
@@ -222,7 +263,7 @@ int main() {
         if (b > 10) {
             return b;
         } else {
-            return 0;
+            return 0
         }
     )";
 
